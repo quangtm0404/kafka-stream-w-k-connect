@@ -4,14 +4,17 @@ using Confluent.SchemaRegistry;
 using Confluent.SchemaRegistry.Serdes;
 
 
-string bootstrapServers = "localhost:9092";
+string bootstrapServers = "127.0.0.1:9194,127.0.0.1:9294,127.0.0.1:9394";
 string schemaRegistryUrl = "localhost:8081";
-string topicName = "usertopic";
+string topicName = "demo";
 
 var producerConfig = new ProducerConfig
 {
     BootstrapServers = bootstrapServers,
-    SecurityProtocol = SecurityProtocol.Plaintext
+    SecurityProtocol = SecurityProtocol.SaslPlaintext,
+    SaslMechanism = SaslMechanism.Plain,
+    SaslUsername = "user3",
+    SaslPassword = "password3"
 };
 
 var schemaRegistryConfig = new SchemaRegistryConfig
