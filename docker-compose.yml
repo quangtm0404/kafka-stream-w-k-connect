@@ -1,160 +1,192 @@
-version: '3'
-
 services:
-  zookeeper1:
+  # zookeeper as a controller
+  zookeeper:
     image: docker.arvancloud.ir/confluentinc/cp-zookeeper:latest
-    hostname: zookeeper1
-    container_name: zookeeper1
+    hostname: zookeeper
+    container_name: zookeeper
     ports:
       - "2181:2181"
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
-    networks:
-      - kafka-network
-
-
-  kafka:
-    image: docker.arvancloud.ir/confluentinc/cp-kafka:latest
-    hostname: kafka
-    container_name: kafka
-    depends_on:
-      - zookeeper1
-    ports:
-      - "29092:29092"
-      - "9092:9092"
+  # FirstBroker
+  kafka-1:
+    image: 'bitnami/kafka:3.7'
+    container_name: kafka-1
+    hostname: kafka-1
+    restart: unless-stopped
     environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper1:2181'
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
-      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: kafka:29092
-      CONFLUENT_METRICS_REPORTER_ZOOKEEPER_CONNECT: zookeeper1:2181
-      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
-      CONFLUENT_METRICS_ENABLE: 'false'
-    networks:
-      - kafka-network
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_NODE_ID=1
+      - KAFKA_CFG_BROKER_ID=1
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=INTERNAL
+      - KAFKA_CFG_LISTENERS=INTERNAL://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:SASL_PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:SASL_PLAINTEXT      
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka-1:9093,2@kafka-2:9093,3@kafka-3:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=INTERNAL://:9092,EXTERNAL://127.0.0.1:9194
+      #- ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_SASL_MECHANISM_CONTROLLER_PROTOCOL=PLAIN
+      - KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL=PLAIN
+      # - KAFKA_CONTROLLER_USER=user1
+      # - KAFKA_CONTROLLER_PASSWORD=password1
+      # - KAFKA_INTER_BROKER_USER=user2
+      # - KAFKA_INTER_BROKER_PASSWORD=password2
+      - KAFKA_CLIENT_USERS=user3
+      - KAFKA_CLIENT_PASSWORDS=password3
+      - KAFKA_KRAFT_CLUSTER_ID=N2Q0ZTNlMWFhMTgyNDhiZj
+    ports:
+      #- 9192:9092
+      - 9194:9094
+  # Second Broker
+  kafka-2:
+    image: 'bitnami/kafka:3.7'
+    container_name: kafka-2
+    hostname: kafka-2
+    restart: unless-stopped
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_NODE_ID=2
+      - KAFKA_CFG_BROKER_ID=2
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=INTERNAL
+      - KAFKA_CFG_LISTENERS=INTERNAL://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:SASL_PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:SASL_PLAINTEXT      
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka-1:9093,2@kafka-2:9093,3@kafka-3:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=INTERNAL://:9092,EXTERNAL://127.0.0.1:9294
+      #- ALLOW_PLAINTEXT_LISTENER=yes
+      
+      - KAFKA_CFG_SASL_MECHANISM_CONTROLLER_PROTOCOL=PLAIN
+      - KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL=PLAIN
+      # - KAFKA_CONTROLLER_USER=user1
+      # - KAFKA_CONTROLLER_PASSWORD=password1
+      # - KAFKA_INTER_BROKER_USER=user2
+      # - KAFKA_INTER_BROKER_PASSWORD=password2
+      - KAFKA_CLIENT_USERS=user3
+      - KAFKA_CLIENT_PASSWORDS=password3
 
+      - KAFKA_KRAFT_CLUSTER_ID=N2Q0ZTNlMWFhMTgyNDhiZj
+    ports:
+      #- 9192:9092
+      - 9294:9094
+  # Third Broker
+  kafka-3:
+    image: 'bitnami/kafka:3.7'
+    container_name: kafka-3
+    hostname: kafka-3    
+    restart: unless-stopped
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_NODE_ID=3
+      - KAFKA_CFG_BROKER_ID=3
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=INTERNAL
+      - KAFKA_CFG_LISTENERS=INTERNAL://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:SASL_PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:SASL_PLAINTEXT      
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka-1:9093,2@kafka-2:9093,3@kafka-3:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=INTERNAL://:9092,EXTERNAL://127.0.0.1:9394
+      #- ALLOW_PLAINTEXT_LISTENER=yes
+      
+      - KAFKA_CFG_SASL_MECHANISM_CONTROLLER_PROTOCOL=PLAIN
+      - KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL=PLAIN
+      # - KAFKA_CONTROLLER_USER=user1
+      # - KAFKA_CONTROLLER_PASSWORD=password1
+      # - KAFKA_INTER_BROKER_USER=user2
+      # - KAFKA_INTER_BROKER_PASSWORD=password2
+      - KAFKA_CLIENT_USERS=user3
+      - KAFKA_CLIENT_PASSWORDS=password3
 
+      - KAFKA_KRAFT_CLUSTER_ID=N2Q0ZTNlMWFhMTgyNDhiZj
+    ports:
+      #- 9192:9092
+      - 9394:9094
+  # Kafka connect to connect kafka cluster with multiple destination
   connect:
     image: docker.arvancloud.ir/confluentinc/cp-kafka-connect:latest
     hostname: connect
     container_name: connect
     depends_on: 
-      - zookeeper1
-      - kafka
+      - zookeeper
+      - kafka-1
+      - kafka-2
+      - kafka-3
     ports:
       - '8083:8083'
     environment:
-      CONNECT_BOOTSTRAP_SERVERS: 'kafka:29092'
+      CONNECT_BOOTSTRAP_SERVERS: "kafka-1:9092,kafka-2:9092,kafka-3:9092"
       CONNECT_REST_ADVERTISED_HOST_NAME: connect
       CONNECT_REST_PORT: 8083
       CONNECT_GROUP_ID: compose-connect-group
       CONNECT_CONFIG_STORAGE_TOPIC: docker-connect-configs
-      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 3
       CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
       CONNECT_OFFSET_STORAGE_TOPIC: docker-connect-offsets
-      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 3
       CONNECT_STATUS_STORAGE_TOPIC: docker-connect-status
-      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 3
       CONNECT_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_INTERNAL_KEY_CONVERTER: 'org.apache.kafka.connect.json.JsonConverter'
       CONNECT_INTERNAL_VALUE_CONVERTER: 'org.apache.kafka.connect.json.JsonConverter'
       CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE: 'false'
       CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: 'false'
-      CONNECT_ZOOKEEPER_CONNECT: 'zookeeper1:2181'
+      CONNECT_ZOOKEEPER_CONNECT: 'zookeeper:2181'
       # CLASSPATH required due to CC-2422
       CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-5.4.1.jar
       CONNECT_PRODUCER_INTERCEPTOR_CLASSES: 'io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor'
       CONNECT_CONSUMER_INTERCEPTOR_CLASSES: 'io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor'
       CONNECT_PLUGIN_PATH: '/usr/share/java,/usr/share/confluent-hub-components'
       CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=ERROR,org.I0Itec.zkclient=ERROR,org.reflections=ERROR
-    networks:
-      - kafka-network
-
-
+  # Schema Registry (No idea)
   schema-registry:
     image: docker.arvancloud.ir/confluentinc/cp-schema-registry:latest
     hostname: schema-registry
     container_name: schema-registry
     depends_on:
-      - zookeeper1
-      - kafka
+      - zookeeper
+      - kafka-1
+      - kafka-2
+      - kafka-3 
     ports:
       - "8081:8081"
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
-      #SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper1:2181'
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:29092
-    networks:
-      - kafka-network
+      #SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper:2181'
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka-1:9092,kafka-2:9092,kafka-3:9092
     restart: unless-stopped
-
-
-  akhq:
-    image: tchiotludo/akhq
-    hostname: web-ui
-    container_name: web-ui  
-    environment:
-      AKHQ_CONFIGURATION: |
-        akhq:
-          connections:
-            docker-kafka-server:
-              properties:
-                bootstrap.servers: "kafka:29092"
-              schema-registry:
-                url: "http://schema-registry:8081"
-              connect:
-                - name: "connect"
-                  url: "http://connect:8083"
-              ksqldb:
-                - name: "ksqldb"
-                  url: "http://ksqldb-server2:8088"
-
-
-    ports:
-      - 8080:8080
-    links:
-      - kafka
-      - schema-registry
-    networks:
-      - kafka-network
-
-
-  ksqldb-server2:
+  # SqlDb for Kafka
+  ksqldb-server:
     image: docker.arvancloud.ir/confluentinc/cp-ksqldb-server:latest
-    hostname: ksqldb-server2
-    container_name: ksqldb-server2
+    hostname: ksqldb-server
+    container_name: ksqldb-server
     depends_on:
-      - kafka
+      - kafka-1
+      - kafka-2
+      - kafka-3 
       - schema-registry
     ports:
       - "8088:8088"
     environment:
       KSQL_CONFIG_DIR: "/etc/ksqldb"
       KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/etc/ksqldb/log4j.properties"
-      KSQL_BOOTSTRAP_SERVERS: "kafka:29092"
+      KSQL_BOOTSTRAP_SERVERS: "kafka-1:9092,kafka-2:9092,kafka-3:9092"
       KSQL_HOST_NAME: ksqldb-server2
       KSQL_LISTENERS: "http://0.0.0.0:8088"
       KSQL_CACHE_MAX_BYTES_BUFFERING: 0
       KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
       KSQL_CONNECT_URL: "http://connect:8083"
-    networks:
-      - kafka-network
-
-
-  ksqldb-cli2:
+ # CLI to exec KSQLDB
+  ksqldb-cli:
     image: docker.arvancloud.ir/confluentinc/cp-ksqldb-cli:latest
-    container_name: ksqldb-cli2
+    container_name: ksqldb-cli
     depends_on:
-      - kafka
-      - ksqldb-server2
+      - kafka-1 
+      - kafka-2 
+      - kafka-3 
+      - ksqldb-server
     entrypoint: /bin/sh
     environment:
       KSQL_CONFIG_DIR: "/etc/ksqldb"
@@ -162,10 +194,26 @@ services:
     # volumes:
     #   - codes/src:/opt/app/src
     #   - codes/test:/opt/app/test
-    networks:
-      - kafka-network
 
-networks:
-  kafka-network:
-    driver: bridge
-    name: kafka-network
+  # Visualization
+  kafka-ui:
+    container_name: kafka-ui
+    restart: unless-stopped
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+      - schema-registry
+    image: 'provectuslabs/kafka-ui:latest'
+    ports:
+      - "8181:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=MyCluster
+      - KAFKA_CLUSTERS_0_BOOTSTRAP_SERVERS=kafka-1:9092
+      - KAFKA_CLUSTERS_0_SCHEMAREGISTRY=http://schema-registry:8081
+      - KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS=http://connect:8083
+      - KAFKA_CLUSTERS_0_KSQLDBSERVER=http://ksqldb-server:8088
+      - KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL=PLAINTEXT
+      - KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM=PLAIN
+      # - KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG=org.apache.kafka.common.security.plain.PlainLoginModule required username="user3" password="password3";
+      #- DYNAMIC_CONFIG_ENABLED=true # not necessary for sasl auth, added for tests     
