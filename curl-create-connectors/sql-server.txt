@@ -1,0 +1,26 @@
+curl --location 'http://localhost:8083/connectors' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJDdnhQSVNtbUxQM1M2a0hweTRDeHNUeUd0QlRNbXFKYWFkR09Gem04NzFRIn0.eyJleHAiOjE3MjEyMzMyMTIsImlhdCI6MTcyMTIzMjkxMiwianRpIjoiMTdmZjc4MjYtZDBmMi00ODRmLWJlMzMtNmRiNjhkN2NkMzliIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL3JlYWxtcy9hcHBsaWNhdGlvbiIsImF1ZCI6WyJyZWFsbS1tYW5hZ2VtZW50IiwiYWNjb3VudCJdLCJzdWIiOiJlYjM5NjU5Ni1lM2U3LTRhNmMtODk1Mi03OGE1ZjQzYmYyYzYiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJ3ZWJhcGkiLCJzaWQiOiI1ZTgwYTg5Yi1mMGQ0LTQ1Y2YtOWI1My0xNGFmYThiOWFkNmMiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbImh0dHA6Ly9sb2NhbGhvc3Q6NTAwMCJdLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsiZGVmYXVsdC1yb2xlcy1hcHBsaWNhdGlvbiIsIm9mZmxpbmVfYWNjZXNzIiwidW1hX2F1dGhvcml6YXRpb24iXX0sInJlc291cmNlX2FjY2VzcyI6eyJyZWFsbS1tYW5hZ2VtZW50Ijp7InJvbGVzIjpbInZpZXctcmVhbG0iLCJ2aWV3LWlkZW50aXR5LXByb3ZpZGVycyIsIm1hbmFnZS1pZGVudGl0eS1wcm92aWRlcnMiLCJpbXBlcnNvbmF0aW9uIiwicmVhbG0tYWRtaW4iLCJjcmVhdGUtY2xpZW50IiwibWFuYWdlLXVzZXJzIiwicXVlcnktcmVhbG1zIiwidmlldy1hdXRob3JpemF0aW9uIiwicXVlcnktY2xpZW50cyIsInF1ZXJ5LXVzZXJzIiwibWFuYWdlLWV2ZW50cyIsIm1hbmFnZS1yZWFsbSIsInZpZXctZXZlbnRzIiwidmlldy11c2VycyIsInZpZXctY2xpZW50cyIsIm1hbmFnZS1hdXRob3JpemF0aW9uIiwibWFuYWdlLWNsaWVudHMiLCJxdWVyeS1ncm91cHMiXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwibmFtZSI6Ik1pbmggUXVhbmcgVHJhbmciLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJxdWFuZ3RtIiwiZ2l2ZW5fbmFtZSI6Ik1pbmggUXVhbmciLCJmYW1pbHlfbmFtZSI6IlRyYW5nIiwiZW1haWwiOiJxdWFuZ3RtQHZpZXRtYXAudm4ifQ.vA83_VRTfGXb_gdTfM1ANBLlifLbBWLAbZP_EUVhc_QyWshiBIHottSXkmrC_eZzjizMFvbYeRSsjmdlmIK8RpAGZI8Pgnak--cDmDPb3SPWgbZDcyytawxSRJBnynXjf04nujMoW1fK13iwVTpMNOLTncc1EaapoR75uHDQMKKBmuoSGpJN1y4OYS_cro8JzUwJv1ws6zfQAB9a7kAgt0dCbgW_op1EOSex5IBZ4lg24cU0SIhYJ_UXpNAYWExtdlp1oJxC4w_3DmycUaG8NA6LqIpOhSnGEUXmiOEXH9wWeQwjV5-heGhszGXHMo8R_Mc5VJoFHHOqkCR9E17gzw' \
+--data-raw '{
+    "name" : "sql-server-sink",
+    "config" : {
+        "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+        "table.name.format": "UserTopic",
+        "connection.password": "z@123456!",
+        "tasks.max": "1",
+        "topics": "usertopic",
+        "schema.registry.url": "http://schema-registry:8081",
+        "value.converter.schema.registry.url": "http://schema-registry:8081",
+        "auto.evolve": "true",
+        "connection.user": "sa",
+        "value.converter.schemas.enable": "true",
+        "name": "sql-server-sink",
+        "auto.create": "true",
+        "value.converter": "io.confluent.connect.avro.AvroConverter",
+        "connection.url": "jdbc:sqlserver://192.168.1.134:1434;ValidateServerCertificate=false;databaseName=KafkaStorage",
+        "insert.mode": "insert",
+        "pk.mode": "none"
+    }
+}'
+
+-- Request Kafka Connect to create a Kafka sink - syncing record from topic into Destination

@@ -1,0 +1,24 @@
+curl --location 'http://localhost:8083/connectors' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: ••••••' \
+--data '{
+    "name" : "postgre-sql-sink",
+    "config" : {
+        "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+        "table.name.format": "public.usertopic",
+        "connection.password": "changeme",
+        "tasks.max": "1",
+        "topics": "usertopic",
+        "schema.registry.url": "http://schema-registry:8081",
+        "value.converter.schema.registry.url": "http://schema-registry:8081",
+        "auto.evolve": "true",
+        "connection.user": "postgres",
+        "value.converter.schemas.enable": "true",
+        "name": "postgre-sql-sink",
+        "auto.create": "true",
+        "value.converter": "io.confluent.connect.avro.AvroConverter",
+        "connection.url": "jdbc:postgresql://192.168.1.134:5432/kafkastorage",
+        "insert.mode": "insert",
+        "pk.mode": "none"
+    }
+}'
